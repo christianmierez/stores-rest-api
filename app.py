@@ -3,10 +3,10 @@ from flask_restful import Api
 from flask_jwt import JWT
 
 from security import authenticate, identity
-from db_sql import db_sql
 from resources.user import UserRegister
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
+from db_sql import db_sql
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
@@ -37,7 +37,8 @@ api.add_resource(ItemList, '/items')
 api.add_resource(StoreList, '/stores')
 api.add_resource(UserRegister, '/register')
 
-# this prevents to run the app when app.py is imported from another file 
+db_sql.init_app(app)
+
+# prevents to run the app when app.py is imported from another file 
 if __name__ == '__main__':
-    db_sql.init_app(app)
     app.run(port=5000, debug=True)
