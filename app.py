@@ -13,6 +13,7 @@ from db_sql import db_sql
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PROPAGATE_EXCEPTIONS'] = True
 
 # changes the url to the authentication endpoint from /auto to /login
 app.config['JWT_AUTH_URL_RULE'] = '/login'
