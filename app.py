@@ -2,10 +2,9 @@ import os
 
 from flask import Flask, jsonify
 from flask_restful import Api
-from flask_jwt import JWT
+from flask_jwt_extended import JWTManager
 
-from security import authenticate, identity
-from resources.user import UserRegister
+from resources.user import UserRegister, User, UserLogin
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 from db_sql import db_sql
@@ -15,8 +14,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-# changes the url to the authentication endpoint from /auto to /login
-app.config['JWT_AUTH_URL_RULE'] = '/login'
 app.secret_key = 'Pulg@13!_'
 api = Api(app)
 
@@ -24,21 +21,21 @@ api = Api(app)
 def create_tables():
     db_sql.create_all()
 
-jwt = JWT(app, authenticate, identity) # creates /auth endpoint
+jwt = JWTManager(app) # creates /auth endpoint
 
-# customize JWT auth response, include user_id in response body
-@jwt.jwt_error_handler
-def customized_error(error):
-    return jsonify({
-        'message': error.description,
-        'code': error.status_code,
-    }), error.status_code
+@jwt.user_claims_loader
+def add_claims_to_jwt(identity): 
+        if identity == 1:   # instead of hard-coding, we should read from a config file or database to get a list of admins instead
+            return {'is_admin': True}
+        return {'is_admin': False}
 
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/items')
 api.add_resource(StoreList, '/stores')
 api.add_resource(UserRegister, '/register')
+api.add_resource(User, '/user/<int:user_id>')
+api.add_resource(UserLogin, '/login')
 
 db_sql.init_app(app)
 

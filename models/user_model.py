@@ -12,8 +12,18 @@ class UserModel(db_sql.Model):
         self.username = username
         self.password = password
     
+    def json(self):
+        return {
+            'id': self.id,
+            'username': self.username
+        }
+    
     def save_to_db(self):
         db_sql.session.add(self)
+        db_sql.session.commit()
+
+    def delete_from_db(self):
+        db_sql.session.delete(self)
         db_sql.session.commit()
 
     @classmethod
